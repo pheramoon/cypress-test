@@ -22,7 +22,7 @@ describe('US Form Test', () => {
         cy.get('#wpforms-327-field_32').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
         cy.get('#wpforms-327-field_24').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
         cy.get('#wpforms-327-field_33').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_2').type('This is an automated form test');
+        cy.get('#wpforms-327-field_2').type('This is an automated form test after any plugin updates. Please ignore.');
         cy.get('#wpforms-form-327').submit();
     })
 })
@@ -49,7 +49,7 @@ describe('CA Form Test', () => {
         cy.get('#wpforms-327-field_32').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
         cy.get('#wpforms-327-field_24').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
         cy.get('#wpforms-327-field_33').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_2').type('This is an automated form test');
+        cy.get('#wpforms-327-field_2').type('This is an automated form test after any plugin updates. Please ignore.');
         cy.get('#wpforms-form-327').submit();
     })
 })
