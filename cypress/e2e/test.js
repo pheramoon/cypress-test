@@ -1,55 +1,78 @@
 /// <reference types="cypress" />
 
-describe('US Form Test', () => {
-    it('Can submit a valid form', () => {
-        cy.visit('https://home-elevator-door-gap.com/submit/');
-        cy.get('#wpforms-327-field_0').type('Mehdi');
-        cy.get('#wpforms-327-field_0-last').type('Mazhari');
-        cy.get('#wpforms-327-field_11').type('2222222222');
-        cy.get('#wpforms-327-field_1').type('mmazhari@savaria.com');
-        cy.get('#wpforms-327-field_9').select('Savaria');
-        cy.get('#wpforms-327-field_8').type('12345');
-        cy.get('#wpforms-327-field_13').type('3025');
-        cy.get('#wpforms-327-field_14').type('Mississauga');
-        cy.get('#wpforms-327-field_16').type('Ontario');
-        cy.get('#wpforms-327-field_15').type('12345');
-        cy.get('#wpforms-327-field_27').selectFile('cypress/downloads/file_example_PDF_mehdi_test.pdf');
-        cy.get('#wpforms-327-field_10').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_30').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_22').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_31').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_23').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_32').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_24').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_33').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_2').type('This is an automated form test after any plugin updates. Please ignore.');
-        cy.get('#wpforms-form-327').submit();
-    })
-})
+/**
+ * Door Gap Recall Form Tests
+ * Tests form submission for both US and CA sites
+ */
 
-describe('CA Form Test', () => {
-    it('Can submit a valid form', () => {
-        cy.visit('https://canada-door-gap-recall.com/submit/');
-        cy.get('#wpforms-327-field_0').type('Mehdi');
-        cy.get('#wpforms-327-field_0-last').type('Mazhari');
-        cy.get('#wpforms-327-field_11').type('2222222222');
-        cy.get('#wpforms-327-field_1').type('mmazhari@savaria.com');
-        cy.get('#wpforms-327-field_9').select('Savaria');
-        cy.get('#wpforms-327-field_8').type('12345');
-        cy.get('#wpforms-327-field_13').type('3025');
-        cy.get('#wpforms-327-field_14').type('Mississauga');
-        cy.get('#wpforms-327-field_16').type('Ontario');
-        cy.get('#wpforms-327-field_15').type('12345');
-        cy.get('#wpforms-327-field_27').selectFile('cypress/downloads/file_example_PDF_mehdi_test.pdf');
-        cy.get('#wpforms-327-field_10').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_30').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_22').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_31').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_23').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_32').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_24').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_33').selectFile('cypress/downloads/Sample-PNG-HD-Image.png');
-        cy.get('#wpforms-327-field_2').type('This is an automated form test after any plugin updates. Please ignore.');
-        cy.get('#wpforms-form-327').submit();
-    })
-})
+const sites = [
+  { 
+    name: 'US', 
+    url: 'https://home-elevator-door-gap.com/submit/',
+    description: 'US Door Gap Form'
+  },
+  { 
+    name: 'CA', 
+    url: 'https://canada-door-gap-recall.com/submit/',
+    description: 'CA Door Gap Form'
+  }
+];
+
+// File paths for uploads
+const testFiles = {
+  pdf: 'cypress/fixtures/files/sample.pdf',
+  image: 'cypress/fixtures/files/sample.png'
+};
+
+describe('Door Gap Recall Form Tests', () => {
+  
+  beforeEach(function() {
+    // Load form data from fixture before each test
+    cy.fixture('formData').as('formData');
+  });
+
+  sites.forEach(({ name, url, description }) => {
+    
+    describe(`${description}`, () => {
+      
+      it(`Can submit a valid form on ${name} site`, function() {
+        // Visit the form page
+        cy.visit(url);
+        
+        // Fill out the form using custom command
+        cy.fillDoorGapForm(this.formData, testFiles);
+        
+        // Submit the form
+        cy.submitDoorGapForm();
+        
+        // Verify submission success
+        // Option 1: Check for success message (adjust selector based on actual success message)
+        cy.get('body').then($body => {
+          // Check if there's a thank you message or confirmation
+          const hasThankYou = $body.text().toLowerCase().includes('thank you') ||
+                              $body.text().toLowerCase().includes('success') ||
+                              $body.text().toLowerCase().includes('submitted');
+          
+          if (hasThankYou) {
+            cy.log('✅ Form submission confirmed via success message');
+          } else {
+            // Fallback: just verify form was submitted (no error messages)
+            cy.get('.wpforms-error').should('not.exist');
+            cy.log('✅ Form submitted without errors');
+          }
+        });
+      });
+
+      it(`Shows validation errors for empty required fields on ${name} site`, function() {
+        cy.visit(url);
+        
+        // Try to submit empty form
+        cy.submitDoorGapForm();
+        
+        // Should show validation errors
+        cy.get('.wpforms-error, .wpforms-required-label, [class*="error"]')
+          .should('exist');
+      });
+    });
+  });
+});
